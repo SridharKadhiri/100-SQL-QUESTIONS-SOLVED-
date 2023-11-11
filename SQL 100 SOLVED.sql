@@ -1,0 +1,549 @@
+use practice;
+show tables;
+select count(*) from employee_df;
+
+-- print firt 5 rows 
+select * from employee_df limit 5;
+
+-- print the number of rows 
+select count(*) from employee_df;
+
+-- print first 5 rows of the company _name column and employees_ststus column
+select company_name , employment_status from employee_df limit 5;
+
+-- print first five rows where employee rating >4.5
+select * from employee_df where employee_rating >4.5 limit 5;
+
+-- print number of rows with employee_salary > 600000
+select count(*) from employee_df where employee_salary >600000;
+
+-- print number of rows where employee_salary > 60000 and rating > 4.5
+select count(*) from employee_df where employee_salary > 600000 and employee_rating > 4.5;
+
+-- print top five rows  where employee_salary > 60000 and rating > 4.5
+select * from employee_df where  employee_salary > 600000 and employee_rating > 4.5 limit 5;
+
+-- print distinct companies in the dataset
+select distinct(company_name) from employee_df;
+
+-- print number of distinct companies in the dataset
+select count(distinct(company_name)) from employee_df;
+
+-- print distinct companies,city pairs in the dataset
+select distinct(company_name),employee_city from employee_df;
+
+-- print  count of distinct companies,city pairs in the dataset
+select count(*) from (select distinct(company_name),employee_city from employee_df) as t;
+
+-- print the number of full time employees in the dataset 
+select count(*) from employee_df where employment_status = "Full Time";
+
+-- print the number of employees with jobtitle "production engineer" or 
+-- "new russellton'
+select count(*) from employee_df where employee_job_title = "Production Engineer" or employee_city = "New Russellton";
+
+-- print the number of employees with jobtitle "production engineer" and  
+-- company_name "scott inc'
+select count(*) from employee_df  where employee_job_title = "Production Engineer" and 
+Company_name = "Scott Inc";
+
+/*
+print number of employees with job title either production engineer  or 
+new russellton and company name "Scott Inc"  or "Baker, Allen and Edwards"*/
+select count(*) from employee_df  where 
+(employee_job_title = "Production Engineer" or employee_job_title = "New Russellton") and 
+(company_name = "Scott Inc"  or company_name ="Baker, Allen and Edwards");
+
+/*
+print the number of distinct cities with employees having job_title 
+either "Production engineer" or "New Russellton" and 
+company_name "Scott Inc" or "Baker,Allen and Edwards" */
+select count(distinct(employee_city)) from employee_df where
+(employee_job_title = "Production Engineer" or employee_job_title = "New Russellton") and 
+(company_name = "Scott Inc"  or company_name ="Baker, Allen and Edwards");
+
+-- print the number of intern employees in the dataset 
+select count(*) from employee_df where employment_status = "Intern";
+
+--  print the number of employees with first name "Matthew"
+select count(*) from employee_df where name like "Matthew%";
+
+-- print top 5 employes with highes salary
+select * from employee_df order by employee_salary desc limit 5;
+
+-- print the empoyees top 5 with highest salary in "james and sons" 
+select * from employee_df 
+where company_name = "james and sons"
+order by employee_salary desc limit 5 ;
+
+-- print the top 5 employees detail with highest salary working in 
+-- "james and sons" or living in  "Wardfort"
+select * from employee_df 
+where (company_name = "james and sons" ) or (employee_city = "Wardfort")
+order by employee_salary desc limit 5 ;
+
+-- print distinct records in the data 
+select count(*) from (select distinct * from employee_df) as t ;
+
+-- print the mean salary of all the employees in the data 
+select avg(employee_salary) from employee_df;
+
+-- print the max, min  and median  employee salary.
+select max(employee_salary), min(employee_salary) from employee_df;
+
+-- print the median salary  
+with table_1 as (
+select * from (
+select Employee_salary ,
+	row_number() over (order by employee_salary) as row_asc,
+    row_number() over (order by employee_salary desc) as row_desc
+    from employee_df) as subquery  
+    where row_asc = row_desc  or row_asc+1 = row_desc or  row_asc = row_desc+1
+    )
+    select avg(employee_salary) from table_1;
+
+-- print the distribution of the following columns:
+-- Employee_job_title
+select Employee_job_title ,
+	count(*) as frequency
+    from employee_df
+    group by Employee_job_title
+    order by frequency ;
+-- Company_Name
+select Company_Name ,
+	count(*) as frequency
+    from employee_df 
+    group by Company_Name
+    order by frequency;
+-- employee city
+select Employee_city, count(*) as frequency from employee_df
+group by employee_city order by frequency;
+-- employee_country
+select employee_country, count(*) as frequency from employee_df
+group by employee_country order by frequency;
+-- employment status
+select Employment_status , count(*) as frequency from employee_df
+group by employment_status order by frequency;
+
+-- print the company with most number of employess
+select company_name from
+(select company_name, count(*) as count from employee_df 
+group by company_name
+order  by count desc 
+limit 1) subquery;
+
+-- print the number of employees in the above company
+select count(*) as count from employee_df 
+group by company_name
+order  by count desc 
+limit 1;
+
+-- print the company name with the least number of employees
+select company_name from (
+select company_name,count(*) as count from employee_df group by company_name
+order by count limit 1 ) as subquery;
+
+-- print the number of employees in the above company
+select count from (
+select company_name,count(*) as count from employee_df group by company_name
+order by count limit 1 ) as subquery;
+
+-- print the employee details with the max salary 
+select * from employee_df 
+order by employee_salary desc
+limit 1;
+
+-- print the employee details with the max rating
+select * from employee_df 
+order by employee_rating desc
+limit 1;
+
+--  print the company name with the most number of employees in wardfort city
+SELECT COMPANY_NAME FROM (
+SELECT COMPANY_NAME ,COUNT(*) AS COUNT FROM EMPLOYEE_DF 
+WHERE EMPLOYEE_CITY = "WARDFORT"
+GROUP BY COMPANY_NAME 
+ORDER BY COUNT DESC LIMIT 1) AS SUB
+;
+
+-- PRINT EMPLOYEE SALARY COLUMN AS STRING
+SELECT CONCAT("SALARY :",CAST(EMPLOYEE_SALARY AS CHAR)) AS FORMATTED_SALARY
+FROM EMPLOYEE_DF;
+
+-- PRINT THE EMPLOYEE_CITY WITH THE MOST NUMBER OF PRODUCTION ENGINEERS
+SELECT EMPLOYEE_CITY FROM (
+	SELECT 
+	EMPLOYEE_CITY , 
+	COUNT(*) AS NO_OF_EMPLOYEES
+    FROM EMPLOYEE_DF
+	WHERE EMPLOYEE_JOB_TITLE = "PRODUCTION ENGINEER"
+	GROUP BY EMPLOYEE_CITY
+	ORDER BY NO_OF_EMPLOYEES DESC LIMIT 1) AS SUB;
+
+-- PRINT THE COMPANY NAME WITH THE MOST NUMBER OF FULL TIME EMPLOYEES
+SELECT COMPANY_NAME FROM (SELECT COMPANY_NAME ,COUNT(EMPLOYMENT_STATUS) NO_EMPLOYEE FROM EMPLOYEE_DF
+WHERE EMPLOYMENT_STATUS  = "FULL TIME"
+GROUP BY COMPANY_NAME
+ORDER BY NO_EMPLOYEE DESC LIMIT 1) AS SUB;
+
+-- PRINT THE COMPANY NAME WITH THE HIGHEST AVG EMPLOYEE RATING 
+SELECT COMPANY_NAME FROM (SELECT COMPANY_NAME, AVG(EMPLOYEE_RATING) AVG_RATING FROM EMPLOYEE_DF
+GROUP BY COMPANY_NAME
+ORDER BY AVG_RATING DESC
+LIMIT 1) AS SUB;
+
+-- PRINT THE NUMER OF EMPLOYEES WORKING IN "RICARDOMOUTH" AND "KRISTABURGH"
+SELECT COUNT(*) FROM EMPLOYEE_DF WHERE 
+EMPLOYEE_CITY = "RICARDOMOUTH" OR EMPLOYEE_CITY = "KRISTABURGH";
+
+-- PRINT THE DISTINCT COMPANY_NAME CORESPONDING TO THE 5 HIGHEST PAID 
+-- EMPLOYEES IN THE DATASET
+SELECT COMPANY_NAME, MAX(EMPLOYEE_SALARY) MAX_SALARY FROM EMPLOYEE_DF
+GROUP BY COMPANY_NAME
+ORDER BY MAX_SALARY DESC LIMIT 5;
+
+-- CHECK IF ANY COLUMN HAS NULLVALUES
+SELECT COUNT(*) IS NULL FROM EMPLOYEE_DF;
+
+-- PRINT THE DATATYPE OF EACH AND EVERY COLUMN IN THE DATA 
+DESC EMPLOYEE_DF;
+
+-- PRINT THE NUMBER OF EMPLOYEES WITH EMPLOYEE RATING REATER THAN THE 
+-- AVERAGE EMPLOYEE RATING
+SELECT COUNT(*) FROM EMPLOYEE_DF WHERE 
+EMPLOYEE_RATING > (SELECT AVG(EMPLOYEE_RATING) FROM EMPLOYEE_DF);
+
+-- FIND THE EMPLOYEE WHICH HAS THE HIGHEST SALARY AMONG THE LOWEST RATING 
+SELECT  NAME FROM EMPLOYEE_DF 
+WHERE EMPLOYEE_RATING  = (SELECT MIN(EMPLOYEE_RATING)  FROM EMPLOYEE_DF)
+ORDER BY EMPLOYEE_SALARY DESC
+LIMIT 1;
+
+-- SORT THE TABLE IN THE ASCENDING ORDER OF EMPLOYEE_SALARY
+SELECT * FROM EMPLOYEE_DF ORDER BY EMPLOYEE_SALARY;
+
+-- SORT THE EMPLOYEE TABLEIN THE DESCENDING ORDER OF EMOYEE SALARY 
+SELECT * FROM EMPLOYEE_DF ORDER BY EMPLOYEE_SALARY DESC;
+
+-- SELECT THE 100 TH EMPLOYEE AFTER SORTING ON THE NAME COLUMN
+SELECT * FROM EMPLOYEE_DF ORDER BY NAME 
+LIMIT 99,1;
+
+-- PRINT THE FIST 5 ROWS OF THE FIRST 5 COLUMNS
+
+-- PRINT THE NUMBER OF EMPLOYEES WHOSE FIRST NAME STARTS WITH THE "v"
+SELECT COUNT(*) FROM EMPLOYEE_DF WHERE NAME LIKE "v%";
+
+-- PRINT THE NUMBER OF EMPLOYEES WHOSE FIRST NAME STARTS WITH THE "r"
+SELECT COUNT(*) FROM EMPLOYEE_df WHERE NAME LIKE "% r%";
+
+-- SELECT THE ROWS 2-7  AND THE COLUMNS 3-7 (BOTH INCLUDED)
+SELECT *  FROM EMPLOYEE_DF LIMIT 2,5;
+
+-- SELECT EVERY ROW AFTER TH E10TH ROW AND SELECT ALL COLUMNS
+SELECT * FROM EMPLOYEE_DF LIMIT 1;
+
+-- SELECT EVERY ROW UPTO 10TH ROW AND ALL THE COLUMNS
+SELECT * FROM EMPLOYEE_DF LIMIT 0,10;
+
+-- SELECT ROWS WITH EMPLOYEE ATING > 4.5
+SELECT * FROM EMPLOYEE_DF WHERE EMPLOYEE_RATING > 4.5;
+
+-- SELECT ROWS WITH EMPLOYEE RATING >4.5 AND < 4.8
+SELECT * FROM EMPLOYEE_DF WHERE EMPLOYEE_RATING >4.5 AND EMPLOYEE_RATING<4.8 ;
+
+-- PRINT THE NAME OF THE COMPANY WITH MAXIMUM EMPLOYEES RATING >4
+SELECT COMPANY_NAME FROM (
+SELECT COMPANY_NAME,COUNT(NAME) AS NO_EMPLOYEES FROM  EMPLOYEE_DF 
+WHERE EMPLOYEE_RATING >4
+GROUP BY  COMPANY_NAME 
+ORDER BY NO_EMPLOYEES DESC LIMIT 1) AS SUB;
+
+--  GET THE RATING OF THE EMPLOYEE WITH THE NAME "JULIE MORTON"
+SELECT EMPLOYEE_RATING FROM EMPLOYEE_DF WHERE NAME  = "JULIE MORTON";
+
+--  PRINT THE THIRD ENTRY IN THE COLUMN EMPLOYEE_CITY
+SELECT EMPLOYEE_CITY FROM EMPLOYEE_DF LIMIT 2,1;
+
+-- aRE THE NUMBER OF EMPLOYEES IN THE "SCOTT INC" COMAPNY GREATER THAN 
+-- THAT IN THE "ANDRADE INC" 
+SELECT 
+(SELECT COUNT(*) FROM EMPLOYEE_DF WHERE COMPANY_NAME = "SCOTT INC")
+>(SELECT COUNT(*) FROM EMPLOYEE_DF WHERE COMPANY_NAME = "ANDRADE LLC")
+AS SCOTT_GREATER_THAN_ANDRADE;
+;
+
+-- WHICH IS THE MOST COMMON FIRST NAME IN THE DATA 
+SELECT FIRST_NAME FROM
+(SELECT FIRST_NAME,COUNT(*) AS FREQ FROM 
+(SELECT 
+	NAME,
+	substring_index(NAME," ",1) AS FIRST_NAME,
+    substring_index(NAME, " ",-1) AS LAST_NAME
+FROM EMPLOYEE_DF) AS SUB
+GROUP BY FIRST_NAME 
+ORDER BY FREQ DESC LIMIT 1)AS SUB2;
+
+-- WHICH IS THE LEAST COMMON LAST NAME FRM THE DATA 
+SELECT LAST_NAME FROM (SELECT LAST_NAME,COUNT(LAST_NAME) FROM (SELECT NAME ,SUBSTRING_INDEX(NAME," ",-1) AS LAST_NAME FROM EMPLOYEE_DF)AS DF
+GROUP BY LAST_NAME
+ORDER BY COUNT(LAST_NAME) DESC LIMIT 1)AS SUB_2;
+
+-- WHAT IS THE AVERAGE LENGTH OF THE NAME 
+SELECT AVG(LENGTH(NAME)) FROM EMPLOYEE_DF;
+
+-- WHAT IS THE RATIO OF TOTAL FULL TIME EMPLOYEES TO INTERNS
+SELECT 
+(SELECT COUNT(*) FROM EMPLOYEE_DF WHERE EMPLOYMENT_STATUS = "FULL TIME")/
+(SELECT COUNT(*) FROM EMPLOYEE_DF WHERE EMPLOYMENT_STATUS = "iNTERN") AS RATIO_OF_FULLTIME_TO_INTERNS;
+
+-- STARTING FROM THE FIRST PRINT EVERY 3RD ELEMENT IN THE DATA 
+SELECT * FROM 
+(SELECT *,row_number() OVER(ORDER BY NAME) AS ROW_ID FROM EMPLOYEE_DF )AS SUB
+WHERE ROW_ID %3 = 0;
+
+-- GET THE AVG OF SALARY COMPANY LEVEL
+SELECT COMPANY_NAME, AVG(EMPLOYEE_SALARY) AS AVG_SALARY FROM EMPLOYEE_DF
+GROUP BY COMPANY_NAME
+ORDER BY AVG_SALARY DESC;
+
+-- GET THE AVG RATING ON COMPANY LEVEL
+SELECT COMPANY_NAME , AVG(EMPLOYEE_RATING) AS AVG_RATING FROM EMPLOYEE_DF
+GROUP BY COMPANY_NAME
+ORDER BY AVG_RATING DESC;
+
+-- GET THE AVG_RATING AND AVG_SALARY IN ONE LINE FOR EVERY COMPANY
+SELECT CONCAT(COMPANY_NAME,"   ", AVG_SALARY,"  ",AVG_RATING) AS C FROM (
+SELECT 
+	COMPANY_NAME,
+	AVG(EMPLOYEE_SALARY) AS AVG_SALARY ,
+    AVG(EMPLOYEE_RATING) AS AVG_RATING
+    FROM EMPLOYEE_DF
+    GROUP BY COMPANY_NAME) AS SUB;
+    
+
+-- FIND THE NUMBER OF UNIQUE EMPLOYEE_CITY CORRESPONDING TO EVERY COMPANY_NAME
+SELECT COMPANY_NAME,COUNT(DISTINCT EMPLOYEE_CITY) FROM EMPLOYEE_DF
+group by COMPANY_NAME
+ORDER BY COUNT(EMPLOYEE_CITY);
+
+-- PRINT THE NUMBER OF FULL TIME AND INTERN EMPLOYEES FOR EVERY COMPANY
+SELECT 
+	COMPANY_NAME,
+    SUM(CASE WHEN EMPLOYMENT_STATUS = "FULL TIME" THEN 1 ELSE 0 END) AS FULL_TIME_EMPLOYEES,
+    SUM(CASE WHEN EMPLOYMENT_STATUS = "INTERN" THEN 1 ELSE 0 END) AS INTERN_EMPLOYEES
+    FROM EMPLOYEE_DF
+GROUP BY COMPANY_NAME;
+
+-- PRINT THE JOB TITLE WITH THE MOST EMPLOYEES
+SELECT EMPLOYEE_JOB_TITLE
+    FROM EMPLOYEE_DF
+    GROUP BY EMPLOYEE_JOB_TITLE
+    ORDER BY COUNT(*) DESC LIMIT 1;
+    
+-- PRINT THE JOB TITLE WITH MOST EMPLOYEES CORRESPONDING TO EVERY COMPANY
+WITH TABLE_1 AS (
+SELECT 
+	COMPANY_NAME,
+    EMPLOYEE_JOB_TITLE ,
+    RANK() OVER(PARTITION BY COMPANY_NAME ORDER BY COUNT(*) DESC) AS JOB_RANK
+    FROM EMPLOYEE_DF 
+group by COMPANY_NAME,EMPLOYEE_JOB_TITLE
+)
+SELECT COMPANY_NAME, EMPLOYEE_JOB_TITLE FROM TABLE_1 WHERE JOB_RANK = 1;
+
+-- FND THE AVERAGE SALARY CORRESPONDING TO EVERY VALUE OF EMPLOYMENT_STATUS
+SELECT EMPLOYMENT_STATUS , AVG(EMPLOYEE_SALARY) FROM EMPLOYEE_DF
+GROUP BY EMPLOYMENT_STATUS ;
+
+-- PRINT THE ROW NUMBER CORRESPONDING TO MAXIMUM EMPLOYEE SALARY 
+SELECT ROW_ID FROM (
+SELECT * , row_number() OVER() AS ROW_ID FROM EMPLOYEE_DF ) AS SUB
+ORDER BY EMPLOYEE_SALARY DESC LIMIT 1;
+
+-- HOW MANY UNIQUE FIRSTNAMES EXIST IN THE DATA 
+SELECT COUNT(DISTINCT substring_index(NAME," ", 1)) FROM EMPLOYEE_DF;
+
+-- HOW MANY UNIQUE LAST NAMES EXIST IN THE DATA 
+SELECT COUNT(DISTINCT SUBSTRING_INDEX(NAME," " ,-1)) FROM EMPLOYEE_DF;
+
+-- HOW MANY FIRSTNAMES EXIST IN THE DATA FOR EVER COMPANY
+SELECT COMPANY_NAME , COUNT(DISTINCT SUBSTRING_INDEX(NAME," ",1)) AS NO_LASTNAMES FROM EMPLOYEE_DF
+GROUP BY COMPANY_NAME ORDER BY NO_LASTNAMES DESC;
+
+--  ARE THERE ANY ROWS FOR THE EMPLOYEE_NAME "MICHEAL EDWARD"
+SELECT * FROM EMPLOYEE_DF WHERE NAME  = "MICHEAL EDWARD" ;
+
+-- CHECK WHETHER THERE ARE RECORDS WHERE "MICHEAL EDWARD" APPEARS IN THE NAME AS A SUBSTRING
+SELECT 
+	CASE WHEN COUNT(*) >0 THEN "YES" ELSE "NO" END AS HAS_MICHEAL_EDWARD
+    FROM EMPLOYEE_DF
+WHERE NAME LIKE "%MICHEAL EDWARD%";
+
+-- HOW MANY UNIQUE JOB TITLES START WTH SUBSTRING "Pr" CASE SENSITIVE
+SELECT COUNT(DISTINCT EMPLOYEE_JOB_TITLE) FROM EMPLOYEE_DF WHERE 
+EMPLOYEE_JOB_TITLE LIKE "Pr%";
+
+-- HOW MANY RECORDS EXIST WHOSE COUNTRY END WITH "URT" SUBSTRING
+SELECT COUNT(*) FROM EMPLOYEE_DF WHERE EMPLOYEE_COUNTRY LIKE "%urt" ;
+
+-- HOW MANY RECORDS EXIST WHOSE COMPANY NAME HAS "LL" SUBSTRING
+SELECT COUNT(*) FROM EMPLOYEE_DF WHERE COMPANY_NAME LIKE "%LL%";
+
+-- SELECT THE FIRST ROW CORRESPONDING TO EVERY COMPAY IN THE DATA
+SELECT * FROM 
+(SELECT * , row_number() OVER(PARTITION BY COMPANY_NAME)  AS ROW_NUMBER_ FROM EMPLOYEE_DF
+)AS SUB WHERE ROW_NUMBER_ = 1;
+
+-- SELECT THE LAST ROW CORRESPONDING TO EVERY COMPANY IN TE DATA--  
+-- SELECT * ,ROW_NUMBER() OVER(PARTITION BY COMPANY_NAME ORDER BY ) AS ROW_ID
+-- FROM EMPLOYEE_DF
+
+-- ADD A NEW ROW TO THE BOTTOM OF THE DATA 
+INSERT INTO EMPLOYEE_DF ()
+VALUES ("SRIDHAR KADHIRI",
+		"CONCENTRIX",
+        "DATA ANALYST",
+        "VISAKHAPATNAM",
+        "INDIA",
+        "980000",
+        "FULL TIME",
+        4.9);
+
+SELECT * FROM EMPLOYEE_DF WHERE COMPANY_NAME = "CONCENTRIX";
+
+SELECT COUNT(*) FROM EMPLOYEE_DF;
+
+-- ADD A NEW COLUMN "EMPLOYEE_RATING_NEW" CALCULATION AS = MAX(1.5,2*EMPLOYEE_RATING-3)
+ALTER TABLE EMPLOYEE_DF
+ADD COLUMN EMPLOYEE_RATING_NEW INT;
+
+SET SQL_SAFE_UPDATES = 0;
+UPDATE EMPLOYEE_DF
+SET EMPLOYEE_RATING_NEW = greatest(1.5 , (2 * EMPLOYEE_RATING)-3 ) ;
+SET SQL_SAFE_UPDATES = 1;
+
+SELECT * FROM EMPLOYEE_DF ORDER BY EMPLOYEE_RATING;
+
+ALTER TABLE EMPLOYEE_DF
+DROP EMPLOYEE_RATING_NEW;
+
+SELECT * FROM EMPLOYEE_DF;
+
+ALTER table EMPLOYEE_DF
+ADD COLUMN EMPLOYEE_RATING_NEW DECIMAL(5,2);
+
+SELECT * FROM EMPLOYEE_DF;
+
+SET SQL_SAFE_UPDATES = 0;
+UPDATE EMPLOYEE_DF 
+SET EMPLOYEE_RATING_NEW = GREATEST(1.5,(2 * EMPLOYEE_RATING)-3);
+SET SQL_SAFE_UPDATES = 1;
+
+SELECT * FROM EMPLOYEE_DF ORDER BY EMPLOYEE_RATING; -- 417
+
+-- UPDATE THE NAME COLUMN TO CNVERT THE STRING TO LOWER CASE
+UPDATE EMPLOYEE_DF
+SET NAME = LOWER(NAME) ;
+SET SQL_SAFE_UPDATES = 1;
+
+-- ADD A NEW COLUMN NAMED FIRST_NAME FROM NAME 
+ALTER TABLE EMPLOYEE_DF 
+ADD COLUMN FIRST_NAME CHAR(45);
+
+UPDATE EMPLOYEE_DF
+SET FIRST_NAME  = substring_index(NAME," ",1);
+
+SET SQL_SAFE_UPDATES = 0;
+SET SQL_SAFE_UPDATES = 1;
+
+-- ADD A NEW COLUMN LAST_NAME FRM THE NAME 
+ALTER TABLE EMPLOYEE_DF
+ADD COLUMN LAST_NAME CHAR(45);
+
+SET SQL_SAFE_UPDATES = 0;
+UPDATE EMPLOYEE_DF 
+SET LAST_NAME = SUBSTRING_INDEX(NAME," ",-1);
+SET SQL_SAFE_UPDATES = 1;
+
+-- DROP THE NAME COLUMN FROM THE DATABASE
+SET SQL_SAFE_UPDATES = 0;
+ALTER TABLE EMPLOYEE_DF
+DROP NAME;
+SET SQL_SAFE_UPDATES = 1;
+
+-- RENAME THE COLUMNS
+ALTER TABLE EMPLOYEE_DF
+-- CHANGE EMPLOYEE_RATING  RATING DECIMAL(5,2), 
+CHANGE EMPLOYEE_COUNTRY COUNTRY CHAR(100),
+CHANGE EMPLOYEE_SALARY SALARY INT,
+CHANGE EMPLOYEE_RATING_NEW RATING_NEW DECIMAL(5,2),
+CHANGE EMPLOYMENT_STATUS STATUS CHAR(45),
+CHANGE EMPLOYEE_CITY CITY CHAR(45);
+
+ALTER TABLE EMPLOYEE_DF
+CHANGE EMPLOYEE_JOB_TITLE JOB_TITLE CHAR(100);
+
+-- COMPUTE THE NEW SALARY CATEGORY COLUMN AS FOLLOWS
+-- HIGH -- > ">600000"
+-- MEDIUM -> ">300000 & <600000"
+-- LOW-----> "<300000"
+ALTER TABLE EMPLOYEE_DF
+ADD SALARY_CATEGORY CHAR(15);
+
+UPDATE EMPLOYEE_DF
+SET SALARY_CATEGORY = 
+	CASE 
+		WHEN SALARY >600000 THEN "High" 
+        WHEN SALARY >=300000 AND SALARY <=600000 THEN "Medium"
+        WHEN SALARY <300000 THEN "Low"
+        END;
+SET SQL_SAFE_UPDATES = 1;
+
+-- PRINT THE COUNT OF DISTRIBUTION OF SALARY CATEGORY COLUMN
+SELECT SALARY_CATEGORY, COUNT(*) AS FREQUENCY FROM EMPLOYEE_DF
+GROUP BY SALARY_CATEGORY;
+
+-- MAP EVERY COMPANY NAME  TO A UNIQUE INTEGER VALUE , NAME THE NEW COLUMMNN NAME
+-- COMPANY_ID
+CREATE VIEW COMPANY_MAPPING AS
+SELECT 
+	COMPANY_NAME,
+	ROW_NUMBER() OVER() AS COMPANY_ID
+    FROM EMPLOYEE_DF GROUP BY COMPANY_NAME;
+SELECT * FROM COMPANY_MAPPING; -- CHECKING MY VIEW 
+ALTER TABLE EMPLOYEE_DF	-- CREATING A NEW COLUMN WITH INT DATA TYPE
+ADD COLUMN COMPANY_ID INT;
+
+SET SQL_SAFE_UPDATES  = 0;
+UPDATE EMPLOYEE_DF E
+JOIN COMPANY_MAPPING M ON E.COMPANY_NAME = M.COMPANY_NAME
+SET E.COMPANY_ID = M.COMPANY_ID;
+SET SQL_SAFE_UPDATES  = 1;
+########################
+-- SUCCESSFULLY MAPPED 
+########################
+
+-- GENERRATE ONE_HOT LABELS FOR THE EMPLOYMENT _TYPE COLUMN 
+
+
+#
+-- PRINT THE NUMBER OF ROWS WHERE CITY BELONGS TO FOLLOWING LIST OF CITIES
+-- ["NEW RUSSELLTON", "WHITESIDE", "KRISTABURGH"]
+SELECT COUNT(*) FROM EMPLOYEE_DF WHERE CITY IN 
+("NEW RUSSELLTON", "WHITESIDE", "KRISTABURGH");
+
+-- PRINT THE NAME OF THE PERSON WITH 10TH HIGHEST SALARY 
+SELECT CONCAT(FIRST_NAME," ",LAST_NAME) AS NAME, SALARY FROM EMPLOYEE_DF
+ORDER BY SALARY DESC, NAME LIMIT 9,1;-- megan petersen	999950
+
+-- PRINT THE STANDARD DEVIATION OF SALARY COLUMN
+SELECT STD(SALARY) FROM EMPLOYEE_DF;
+
+-- SORT ON THE EMPLOYEE SALARY COLUMN
+SELECT * FROM EMPLOYEE_DF ORDER BY SALARY DESC;
+
+-- FIND THE AVERAGE SALARY COMPANY LEVEL FOR ONLY THOSE COMPANIES WHERE 
+-- NO OF EMPLOYEES IS MORE THAN 120
+SELECT COMPANY_NAME ,AVG(SALARY) FROM EMPLOYEE_DF
+GROUP BY COMPANY_NAME HAVING COUNT(*) > 120;
